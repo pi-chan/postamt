@@ -42,6 +42,9 @@ module Postamt
     Thread.current[:postamt_overwritten_default_connections] ||= {}
   end
 
+  # if Rails::VERSION::STRING == "4.0.0.beta1"
+  #   Postamt::ConnectionSpecificationResolver = ActiveRecord::Base::ConnectionSpecification::Resolver
+  # els
   if Rails::VERSION::MAJOR == 4 and Rails::VERSION::MINOR == 0
     Postamt::ConnectionSpecificationResolver = ActiveRecord::ConnectionAdapters::ConnectionSpecification::Resolver
   elsif Rails::VERSION::MAJOR == 3 and Rails::VERSION::MINOR == 2
@@ -52,7 +55,9 @@ module Postamt
 
   # Called by Postamt::Railtie
   def self.hook!
-    if Rails::VERSION::MAJOR == 4 and Rails::VERSION::MINOR == 0
+    if Rails::VERSION::STRING == "4.0.0.beta1"
+      ActiveRecord::Base.connection_handler = Postamt::ConnectionHandler.new
+    elsif Rails::VERSION::MAJOR == 4 and Rails::VERSION::MINOR == 0
       ActiveRecord::Base.default_connection_handler = Postamt::ConnectionHandler.new
     elsif Rails::VERSION::MAJOR == 3 and Rails::VERSION::MINOR == 2
       ActiveRecord::Base.connection_handler = Postamt::ConnectionHandler.new
